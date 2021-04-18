@@ -6,11 +6,13 @@ const Schema = mongoose.Schema;
 
 const rolePermissionSchema = new Schema({
   roleId:{
-    type: String,
+    type: Schema.Types.ObjectId,
+    ref: 'Role'
   },
 
   permissionId: {
-    type: String
+    type: Schema.Types.ObjectId,
+    ref: 'Permission'
   },
 })
 

@@ -1,33 +1,27 @@
-import Joi from "joi";
-import {ERROR, Message, SUCCESS} from "../util/message";
+import { Message} from "../util/message";
+import {ERROR} from '../util/error'
+import {SUCCESS} from '../util/success'
 import Permission from "../model/permission";
 import express from "express";
-
+import * as Check from '../constant/verification'
+import {auth} from '../middleware/auth'
 
 const router = express.Router();
 
-const addMenuSchema = Joi.object({
-  name: Joi.string().required(),
-  route: Joi.string().required(),
-  parentId: Joi.string(),
-  isMenu: Joi.bool().required(),
-  sort: Joi.number().required()
-})
+
 
 /**
  * 添加菜单
- * @param String name 新增菜单名称
- * @param String route 新增菜单指向的路由
- * @param String parentId 新增菜单的上级 id 如果没有父级默认为 ""
  * */
 
-router.post('/addMenu', async function (req, res, next) {
+router.post('/addMenu', auth,  async function (req, res, next) {
 
   const {name, route, parentId, isMenu, sort} = req.body;
 
+
   try {
 
-    const {error} = addMenuSchema.validate({name, route, parentId, isMenu, sort});
+    const {error} = Check.addMenuSchema.validate({name, route, parentId, isMenu, sort});
 
     if (error) {
       res.json(Message(ERROR.ParamsError.code, error.details[0].message))
@@ -52,10 +46,10 @@ router.post('/addMenu', async function (req, res, next) {
 })
 
 /**
- * 获取菜单
+ * 获取所有菜单
  * */
 
-router.post('/getMenu', async function (req, res, next) {
+router.post('/getMenu', auth, async function (req, res, next) {
 
   try {
     const menuRes = await Permission.find({isMenu: true}).sort({sort: 1})
@@ -68,19 +62,15 @@ router.post('/getMenu', async function (req, res, next) {
 
 })
 
-const deleteMenuSchema = Joi.object({
-  _id: Joi.string().required(),
-})
+
 
 /**
  * 删除菜单
  * */
-router.delete('/deleteMenu', async function (req, res, next) {
+router.delete('/deleteMenu', auth, async function (req, res, next) {
   const {_id} = req.body;
   try {
-    const {error} = deleteMenuSchema.validate({_id});
-
-
+    const {error} = Check.deleteMenuSchema.validate({_id});
 
     if (error) {
       res.json(Message(ERROR.ParamsError.code, error.details[0].message))
@@ -102,21 +92,19 @@ router.delete('/deleteMenu', async function (req, res, next) {
   }
 
 })
-//
-const updateMenuSchema = Joi.object({
-  _id: Joi.string().required(),
-  name: Joi.string().required(),
-  route: Joi.string().required(),
-  sort: Joi.number().required(),
-})
 
 
-router.patch('/updateMenu', async function (req, res, next) {
+/**
+ * 修改菜单
+ * */
+
+
+router.patch('/updateMenu', auth, async function (req, res, next) {
 
   const {_id, name, route, sort} = req.body;
 
   try {
-    const {error} = updateMenuSchema.validate({_id, name, route, sort});
+    const {error} = Check.updateMenuSchema.validate({_id, name, route, sort});
 
     if (error) {
       res.json(Message(ERROR.ParamsError.code, error.details[0].message))

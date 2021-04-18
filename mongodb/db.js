@@ -1,7 +1,6 @@
 import mongoose from 'mongoose';
 import config from '../config';
 
-mongoose.set('useFindAndModify', false)
 
 mongoose.connect(config.url, {useNewUrlParser: true, useUnifiedTopology: true , useCreateIndex: true});
 

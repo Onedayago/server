@@ -14,7 +14,7 @@ const permissionSchema = new Schema({
     type: String
   },
 
-  parentId: {     //如果是菜单，则有这个
+  parentId: {     //父级id
     type: String,
     default: ""
   },
@@ -32,11 +32,56 @@ const permissionSchema = new Schema({
     type: Number,
   }
 
-
 })
 
 
 
 const Permission = mongoose.model('Permission', permissionSchema);
+
+
+Permission.findOne({
+  name: '权限管理',
+}).then(async (res) => {
+
+  const session = await mongoose.startSession();
+  session.startTransaction();
+
+  if(!res){
+
+    try {
+      const perRes = await new Permission({
+        name: '权限管理',
+        route: 'manage',
+        parentId: '',
+        isMenu: true,
+        sort: 1
+      }).save({session})
+
+
+      await new Permission({
+        name: '菜单管理',
+        route: 'manageMenu',
+        parentId: perRes._id,
+        isMenu: true,
+        sort: 1
+      }).save({session})
+
+      await session.commitTransaction();
+    }catch (e) {
+      await session.abortTransaction();
+    }
+
+
+
+  }
+
+  session.endSession();
+
+
+})
+
+
+
+
 
 export default Permission
